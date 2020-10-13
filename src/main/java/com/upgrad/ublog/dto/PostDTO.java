@@ -1,5 +1,9 @@
 package com.upgrad.ublog.dto;
 
+import jdk.vm.ci.meta.Local;
+
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -22,17 +26,7 @@ public class PostDTO {
     private String description;
     private LocalDateTime timestamp;
 
-    public PostDTO(Integer postId, String emailId, String tag, String title, String description, LocalDateTime timestamp) {
-        this.postId = postId;
-        this.emailId = emailId;
-        this.tag = tag;
-        this.title = title;
-        this.description = description;
-        this.timestamp = timestamp;
-    }
 
-    public PostDTO() {
-    }
 
     public Integer getPostId() {
         return postId;
@@ -41,6 +35,7 @@ public class PostDTO {
     public void setPostId(Integer postId) {
         this.postId = postId;
     }
+
     public String getEmailId() {
         return emailId;
     }
@@ -64,7 +59,8 @@ public class PostDTO {
     public void setTitle(String title) {
         this.title = title;
     }
-    public String getDescription () {
+
+    public String getDescription() {
         return description;
     }
 
@@ -72,10 +68,14 @@ public class PostDTO {
         this.description = description;
     }
 
-    public  LocalDateTime getTimestamp(){
-        return  timestamp;
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
-    public  void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+
+    public void setTimestamp(LocalDateTime timestamp) {  this.timestamp = timestamp;    }
+
+
+
 
 
     @Override
@@ -101,8 +101,14 @@ public class PostDTO {
 
 		System.out.println(postDTO);
 
+
+
 		 //Your output should be similar to as shown below.
 		 //PostDTO{postId=1, emailId='dummy@dummy.com', tag='tag', title='title', description='Description', timestamp=2020-05-22T21:01:34.483363800}
 
 	}
+
+    public PostDTO create(PostDTO postDTO) {
+        return null;
+    }
 }

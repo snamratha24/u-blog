@@ -7,7 +7,65 @@
     response.setHeader("Pragma", "no-cache");
     response.setDateHeader("Expires", 0);
 %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
 
+    <title>Create Post</title>
+
+</head>
+<body>
+<%
+    if(session.getAttribute("email")==null){
+        response.sendRedirect("/");
+    }
+%>
+<h3>Logged In as ${username} </h3>
+
+<form action = "post" method = "POST" >
+    <table cellspacing="10">
+        <tr>
+            <td>User Email : </td>
+            <td><%= session.getAttribute("email") %>
+            </td>
+        </tr>
+
+        <tr>
+            <td><label for="title"> Blog Title: </label>
+            </td>
+            <td>
+                <input id="title" type = "text" name = "title" placeholder="Title" required maxlength="200">
+            </td>
+        </tr>
+
+        <tr>
+            <td><label for="tag"> Blog Tag: </label>
+            </td>
+            <td>
+                <input id="tag" type = "text" name = "tag" placeholder="Java" maxlength="10">
+            </td>
+        </tr>
+
+        <tr>
+            <td><label for="description"> Blog Description: </label>
+            </td>
+            <td>
+                <textarea id="description" name="description" rows="15" cols="75" placeholder="Post Description"   required maxlength="10000"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td> <input type = "submit" name = "btn" value = "Post" />
+
+            </td>
+            <td>
+                <a href="/Home.jsp">Home Page</a>
+            </td>
+        </tr>
+
+    </table>
+</form>
+</body>
 <!--
 	TODO: 4.15. Check if user is logged in or not. If not then redirect user to the default page i.e index.jsp.
 	(Hint: You need to handle NullPointerException.)

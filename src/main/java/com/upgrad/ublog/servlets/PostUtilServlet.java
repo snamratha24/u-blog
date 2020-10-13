@@ -1,61 +1,153 @@
 package com.upgrad.ublog.servlets;
 
-/**
- * TODO: 7.6. Modify the class definition to make it a Servlet class (through inheritance).
- * TODO: 7.7. Provide an attribute of type PostService. Override init() method to instantiate
- *  this attribute using the ServiceFactory class.
- * TODO: 7.8. Override doPost() method from the base Class.
- * TODO: 7.9. Check if the user is logged in or not. If not, then redirect them to the
- *  login page. (Hint: Make use of session object)
- * TODO: 7.10. If the request is coming from the Search.jsp page, then do the following:
- *  1. Retrieve the email id from the request object.
- *  2. Validate the email id using the EmailValidator class. If the email is not valid,
- *   then redirect the user to the Search.jsp page with the error message that is stored
- *   in the EmailNotValidException. This error message should be displayed on the Search.jsp page.
- *   (Hint: Don't forget to add the return message after you redirect the user.)
- *  3. If the email id is valid, then fetch all the posts corresponding the email id retrieved from the
- *   request object using the PostService.
- *  4. If no post exists corresponding to the email id, then throw new PostNotFoundException with a message
- *   "Sorry no posts exists for this email id". This exception should be caught and the message should be
- *   passed to the Search.jsp page, where it gets displayed to the user.
- *  5. If posts exist corresponding to the email id, then load the List of PostDTO objects into request
- *   object as an attribute and redirect to the Search.jsp page.
- *  6. If some exception was thrown during the searching of the post, such as PostNotFoundException, handle
- *   all those exceptions, pass the message stored in the exceptions to the Search.jsp page as an attribute
- *   to the request object.
- */
+import com.upgrad.ublog.dto.PostDTO;
+import com.upgrad.ublog.dto.UserDTO;
+import com.upgrad.ublog.exceptions.EmailNotValidException;
+import com.upgrad.ublog.exceptions.PostNotFoundException;
+import com.upgrad.ublog.services.ServiceFactory;
+import com.upgrad.ublog.utils.EmailValidator;
 
-/**
- * TODO: 7.19. If the request is coming from the Delete.jsp page, then do the following:
- *  1. Retrieve the post id from the request object and email id from the session object.
- *  2. Try to delete the post using the deletePost() method of the PostService interface and pass the
- *   post id and the email id.
- *  3. If the deletePost() method return true means post was deleted successfully. In such a scenario,
- *   load the "Post deleted successfully!" message into the request object as an attribute and redirect to
- *   the Delete.jsp page, where this message gets displayed to the user.
- *  4. If the deletePost() method return false means post exists but it was not created by the same user who is
- *   currently logged in. In such a scenario, load the "You are not authorised to delete this post" message
- *   into the request object as an attribute and redirect to the Delete.jsp page, where this message gets
- *   displayed to the user.
- *  5. If some exception was thrown during the deletion of the post, such as PostNotFoundException, handle
- *   all those exceptions, pass the message stored in the exceptions to the Delete.jsp page as an attribute
- *   to the request object.
- */
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
-/**
- * TODO: 7.29. If the request is coming from the Filter.jsp page, then do the following:
- *  1. Retrieve the tag from the request object.
- *  2. Fetch all the posts corresponding to the tag using the getPostsByTag() method of the PostService.
- *  3. If no post exists corresponding to the tag, then throw new PostNotFoundException with a message
- *   "Sorry no posts exists for this tag. This exception should be caught and the message should be
- *   passed to the Filter.jsp page, where it gets displayed to the user.
- *  4. If posts exist corresponding to the tag, then load the list of PostDTO objects into request
- *   object as an attribute and redirect to the Filter.jsp page.
- *  5. If some exception was thrown during the filtering of the post, such as PostNotFoundException, handle
- *   all those exceptions, pass the message stored in the exceptions to the Filter.jsp page as an attribute
- *   to the request object.
- */
 
-public class PostUtilServlet {
+@WebServlet(name = "PostUtilServlet")
+public class PostUtilServlet extends HttpServlet {
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+
+        String action = request.getParameter("actionType");
+
+
+            //CHECK IF USER IS SIGNED IN OR NOT
+            if (session.getAttribute("email") == null) {
+
+                response.sendRedirect("/");
+            } else {
+                //CHECK WHAT ACTIONTYPE
+                if (action.equals("Search")) {
+                    PrintWriter Writer = response.getWriter();
+                    String userEmail = request.getParameter("searchEmail");
+
+                try {
+                    EmailValidator.isValidEmail(userEmail);
+                    ServiceFactory serviceFactory = new ServiceFactory();
+
+                    List<PostDTO> searchPosts = serviceFactory.createPostService().getPostsByEmail(userEmail);
+//                    System.out.println("LIST GOTT : : : : " + searchPosts);
+                    if(searchPosts.isEmpty()) {
+
+                        throw new PostNotFoundException("Sorry no posts exists for this email id");
+
+                    } else {
+
+                        request.setAttribute("PostFound", true);
+                        request.setAttribute("searchPostResults", searchPosts);
+                        request.getRequestDispatcher("/ublog/Search.jsp").forward(request,response);
+                    }
+
+
+
+                } catch (EmailNotValidException e) {
+                    e.printStackTrace();
+                    request.setAttribute("errorMessage", e.getMessage());
+                    System.out.println(e.getMessage());
+                    RequestDispatcher rd = request.getRequestDispatcher("../Search.jsp");
+                    rd.include(request, response);
+
+                } catch( PostNotFoundException post) {
+                    request.setAttribute("isError",true);
+                    request.setAttribute("errorMessage",post.getMessage());
+                    request.getRequestDispatcher("/ublog/Search.jsp").forward(request,response);
+                    return;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("errorMessage", e.getMessage());
+                    System.out.println(e.getMessage());
+                    RequestDispatcher rd = request.getRequestDispatcher("../Search.jsp");
+                    rd.include(request, response);
+
+                }
+
+                    //IF SIGNED IN USER THEN SEARCH FOR POST
+
+
+            }
+
+                if (action.equals("Delete")) {
+
+                    //dDELETING POST
+                    String todeletid = request.getParameter("postid");
+                    int deletid = Integer.parseInt(todeletid);
+                    String emailId = String.valueOf(session.getAttribute("email"));
+                    ServiceFactory serviceFactory = new ServiceFactory();
+                    try {
+                        boolean searchPosts = serviceFactory.createPostService().deletePost(deletid, emailId);
+                        System.out.println("SEAERCHPOST" + searchPosts);
+                        if (searchPosts){
+                            request.setAttribute("errorMessage", "Post deleted successfully!");
+                            RequestDispatcher rd = request.getRequestDispatcher("../Delete.jsp");
+                            rd.include(request, response);
+                        }
+
+                        if (!searchPosts) {
+                            request.setAttribute("errorMessage", "You are not authorised to delete this post");
+                            RequestDispatcher rd = request.getRequestDispatcher("../Delete.jsp");
+                            rd.include(request, response);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        request.setAttribute("errorMessage", e.getMessage());
+                        System.out.println(e.getMessage());
+                        RequestDispatcher rd = request.getRequestDispatcher("../Delete.jsp");
+                        rd.include(request, response);
+
+                    }
+
+                }
+                if (action.equals("Filter")) {
+                    String tagtoDelete = request.getParameter("tag");
+                    System.out.println(tagtoDelete);
+                    ServiceFactory serviceFactory = new ServiceFactory();
+                    try {
+                        List<PostDTO> searchPostsByTag = serviceFactory.createPostService().getPostsByTag(tagtoDelete);
+                        if(searchPostsByTag.isEmpty()) {
+
+                            throw new PostNotFoundException("Sorry no posts exists for this Tag");
+
+                        } else {
+
+                            request.setAttribute("PostFound", true);
+                        System.out.println("TAGGED POST FOUNDEEEY");
+                        System.out.println(searchPostsByTag);
+                            request.setAttribute("searchPostResults", searchPostsByTag);
+                            request.getRequestDispatcher("/ublog/Filter.jsp").forward(request,response);
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+
+
+                }
+
+        }
+
+
+    }
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    }
 }

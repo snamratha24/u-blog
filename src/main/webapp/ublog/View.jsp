@@ -32,3 +32,48 @@
         4. Provide a link to the "Home Page".
         5. You also need to handle "NullPointerException".
 -->
+<%
+    PostDTO post=(PostDTO)session.getAttribute("post");
+%>
+
+<html>
+<head>
+    <title> View Post After Creation </title>
+</head>
+<body>
+<%
+    if(session.getAttribute("email") == null){
+        response.sendRedirect("/");
+    }
+%>
+<h3>Logged In as ${username} </h3>
+
+    <table cellspacing="10">
+        <tr>
+            <td>Email Id : </td>
+            <td><p><%= post.getEmailId()  %></p></td>
+        </tr>
+        <tr>
+            <td>Title : </td>
+            <td><p></p><b><%= post.getTitle()  %> </b></p></td>
+        </tr>
+        <tr>
+            <td>Tag :</td>
+            <td><%= post.getTag()  %> </td>
+        </tr>
+        <tr>
+            <td>Description :</td>
+            <td><%= post.getDescription()  %> </td>
+        </tr>
+        <tr>
+            <td>Time :</td>
+            <td><%= DateTimeFormatter.format(post.getTimestamp())  %> </td>
+
+        </tr>
+
+    </table>
+
+</br>
+<a href=/Home.jsp ><b>Home Page </b></a>
+</body>
+</html>

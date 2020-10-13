@@ -33,6 +33,20 @@ package com.upgrad.ublog.dao;
  *  without setting any of its attributes.
  */
 
+import com.sun.mail.imap.Rights;
+import com.upgrad.ublog.db.DatabaseConnection;
+import com.upgrad.ublog.dto.PostDTO;
+import com.upgrad.ublog.dto.UserDTO;
+import com.upgrad.ublog.services.UserServiceImpl;
+import com.upgrad.ublog.utils.DateTimeFormatter;
+import oracle.jdbc.proxy.annotation.Post;
+
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * TODO: 7.22. Implement findAllTags() method which returns a list of all unique tags in the UBLOG_POSTS
  *  table.
@@ -40,6 +54,193 @@ package com.upgrad.ublog.dao;
  *  posts corresponding to the input "tag" from the UBLOG_POSTS table defined in the database.
  */
 
-public class PostDAOImpl {
+public class PostDAOImpl implements PostDAO {
+
+    PostDAOImpl() {
+    }
+
+    private static PostDAOImpl instance;
+
+    public static PostDAOImpl getInstance() {
+
+        if (instance == null) {
+            instance = new PostDAOImpl();
+        }
+        return instance;
+    }
+
+
+    @Override
+    public PostDTO create(PostDTO postDTO) throws SQLException {
+
+        Connection connection = DatabaseConnection.getConnection();
+        int postId = postDTO.getPostId();
+        String emailId = postDTO.getEmailId();
+        String title = postDTO.getTitle();
+        String tag = postDTO.getTag();
+        String description = postDTO.getDescription();
+        LocalDateTime timestamp = postDTO.getTimestamp();
+        String query = "INSERT INTO ublog_posts(id, email_id, title, description, tag, TIMESTAMP )" + "VALUES (?,?,?,?,?,?)";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setInt(1,postId);
+        statement.setString(2,emailId);
+        statement.setString(3,title);
+        statement.setString(5,tag);
+        statement.setString(4,description);
+        statement.setTimestamp(6, Timestamp.valueOf(timestamp));
+        statement.execute();
+        return postDTO;
+
+    }
+
+    @Override
+    public List<PostDTO> findByEmail(String emailId) throws SQLException {
+        Connection connection = DatabaseConnection.getConnection();
+        List<PostDTO> postDTOS = new ArrayList<PostDTO>();
+        try {
+            String selectQuery = "select id, email_id, title, description, tag, to_date('2014-07-11 12:00:00', 'YYYY-MM-DD HH24:MI:SS') as mydate from ublog_posts WHERE EMAIL_ID ='" + emailId + "'" ;
+//        System.out.println(selectQuery);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+            int i = 0;
+
+            while (resultSet.next()) {
+                    PostDTO postDTO = new PostDTO();
+                    postDTO.setPostId(resultSet.getInt("id"));
+                    postDTO.setEmailId(resultSet.getString("email_id"));
+                    postDTO.setTitle(resultSet.getString("title"));
+                    postDTO.setDescription(resultSet.getString("description"));
+                    postDTO.setTag(resultSet.getString("tag"));
+//            System.out.println("GOING TO FIND TIMESTAMP");
+                    postDTO.setTimestamp(resultSet.getTimestamp("mydate").toLocalDateTime());
+                    postDTOS.add(i, postDTO);
+                    i++;
+//                postDTOS.addAll(Collections.singleton(postDTO));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        finally {
+            return postDTOS;
+        }
+
+
+//        System.out.println("PRINTING THIS METHOD");
+//        System.out.println(postDTOS);
+//        return postDTOS;
+
+    }
+
+    @Override
+    public List<PostDTO> findByTag(String tag) throws SQLException {
+
+        Connection connection = DatabaseConnection.getConnection();
+        List<PostDTO> postDTOS = new ArrayList<PostDTO>();
+        try {
+            String selectQuery = "select id, email_id, title, description, tag, to_date('2014-07-11 12:00:00', 'YYYY-MM-DD HH24:MI:SS') as mydate from ublog_posts WHERE tag ='" + tag + "'" ;
+//        System.out.println(selectQuery);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+            int i = 0;
+
+            while (resultSet.next()) {
+                PostDTO postDTO = new PostDTO();
+                postDTO.setPostId(resultSet.getInt("id"));
+                postDTO.setEmailId(resultSet.getString("email_id"));
+                postDTO.setTitle(resultSet.getString("title"));
+                postDTO.setDescription(resultSet.getString("description"));
+                postDTO.setTag(resultSet.getString("tag"));
+//            System.out.println("GOING TO FIND TIMESTAMP");
+                postDTO.setTimestamp(resultSet.getTimestamp("mydate").toLocalDateTime());
+                postDTOS.add(i, postDTO);
+                i++;
+//                postDTOS.addAll(Collections.singleton(postDTO));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        finally {
+            return postDTOS;
+        }
+
+    }
+
+    @Override
+    public PostDTO findById(int id) throws SQLException {
+        Connection connection = DatabaseConnection.getConnection();
+        PostDTO postDTO = new PostDTO();
+        try {
+            String selectQuery = "select id, email_id, title, description, tag, to_date('2014-07-11 12:00:00', 'YYYY-MM-DD HH24:MI:SS') as mydate from ublog_posts WHERE ID ='" + id + "'" ;
+        System.out.println(selectQuery);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+            while (resultSet.next()) {
+                postDTO.setPostId(resultSet.getInt("id"));
+                postDTO.setEmailId(resultSet.getString("email_id"));
+                postDTO.setTitle(resultSet.getString("title"));
+                postDTO.setDescription(resultSet.getString("description"));
+                postDTO.setTag(resultSet.getString("tag"));
+                postDTO.setTimestamp(resultSet.getTimestamp("mydate").toLocalDateTime());
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return postDTO;
+
+    }
+
+    @Override
+    public List<String> findAllTags() throws SQLException {
+        Connection connection = DatabaseConnection.getConnection();
+        List<String> allTags = new ArrayList<String>();
+        try {
+            String selectQuery = "select tag from ublog_posts GROUP BY tag ORDER BY tag ASC " ;
+//        System.out.println(selectQuery);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+            int i = 0;
+
+            while (resultSet.next()) {
+                allTags.add(i, resultSet.getString("tag"));
+                i++;
+//                postDTOS.addAll(Collections.singleton(postDTO));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        finally {
+            System.out.println("FOUND ALL TAGS" + allTags);
+            return allTags;
+        }
+    }
+
+    @Override
+    public boolean deleteById(int id) throws SQLException {
+
+        //GET CoNNECTON
+        Connection connection = DatabaseConnection.getConnection();
+        int postId = id;
+        try {
+            String deleteQuery = "DELETE FROM ublog_posts WHERE ID ='" + postId + "'" ;
+        System.out.println(deleteQuery);
+            Statement statement = connection.createStatement();
+            int count = statement.executeUpdate(deleteQuery);
+            System.out.println(count);
+
+            if (count == 1) {
+                return true;
+            } else {
+                return false;
+            }
+
+             } catch (SQLException ex) {
+
+                 throw new SQLException(ex);
+            }
+
+    }
+
 
 }

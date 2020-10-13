@@ -1,5 +1,28 @@
 package com.upgrad.ublog.servlets;
 
+import com.upgrad.ublog.dao.UserDAO;
+import com.upgrad.ublog.dao.UserDAOImpl;
+import com.upgrad.ublog.db.DatabaseConnection;
+import com.upgrad.ublog.dto.UserDTO;
+import com.upgrad.ublog.exceptions.EmailNotValidException;
+import com.upgrad.ublog.services.ServiceFactory;
+import com.upgrad.ublog.services.UserService;
+import com.upgrad.ublog.utils.EmailValidator;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+
+import javax.jms.Connection;
+import javax.jms.Session;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 /**
  * TODO: 4.5. Modify the class definition to make it a Servlet class (through inheritance) and
  *  override doPost() method from the base class.
@@ -52,7 +75,129 @@ package com.upgrad.ublog.servlets;
  *  TODO 6.18: If UserService is not able to process the request and throws an exception, get the
  *   message stored in the exception object and display the same message on the index.jsp page.
  */
+@WebServlet(name = "UserServlet")
+public class UserServlet extends HttpServlet{
 
-public class UserServlet {
+//     doPost() -
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        // reportType("doPost", response);
+        response.setContentType("text/html");
+        PrintWriter Writer = response.getWriter();
 
+        String userEmail = request.getParameter("useremail");
+        String userPasswod = request.getParameter("password");
+        String btn = request.getParameter("btn");
+        HttpSession session=request.getSession();
+
+        if (userPasswod == null) {
+
+            request.setAttribute("errorMessage", "Password is a required field");
+            RequestDispatcher rd=request.getRequestDispatcher("/index.jsp");
+            rd.include(request,response);
+            // response.sendRedirect(request.getContextPath() + "index.jsp");
+
+        } else if (btn.equals("Signin")) {
+            try {
+                EmailValidator.isValidEmail(userEmail);
+//                CHECK IF USER EXISTS IN DATABASE
+                ServiceFactory serviceFactory = new ServiceFactory();
+                UserDTO newUser = serviceFactory.createUserService().findByEmail(userEmail);
+                if (newUser.getEmailId() == null) {
+                        //TOT
+                    request.setAttribute("errorMessage", "No user registered with the given email address!");
+                    RequestDispatcher rd=request.getRequestDispatcher("/index.jsp");
+                    rd.include(request,response);
+                } else {
+
+                    if (!newUser.getPassword().equals(userPasswod)) {
+
+                        request.setAttribute("errorMessage", "Please enter valid credentials");
+                        RequestDispatcher rd = request.getRequestDispatcher("/index.jsp");
+                        rd.include(request, response);
+                    } else {
+
+//                System.out.println();
+                        session.setAttribute("email", userEmail);
+                        System.out.println("User Signed In vvvvvvv" + userEmail);
+                        RequestDispatcher rd = request.getRequestDispatcher("../index.jsp");
+                        rd.include(request, response);
+                    }
+                }
+
+            } catch(EmailNotValidException exception) {
+
+                request.setAttribute("errorMessage", exception.getMessage());
+                System.out.println(exception.getMessage());
+                RequestDispatcher rd=request.getRequestDispatcher("../index.jsp");
+                rd.include(request,response);
+            }
+            catch (Exception e) {
+                System.out.println("WHAT AN ASS");
+                e.printStackTrace();
+                System.out.println(e);
+
+            }
+            //IF EMAIL VALIDATION IS SUCCESS
+
+        } else if (btn.equals("Signup")){
+
+            try {
+
+                EmailValidator.isValidEmail(userEmail);
+
+                ServiceFactory serviceFactory = new ServiceFactory();
+                UserDTO newUser = serviceFactory.createUserService().findByEmail(userEmail);
+                if(newUser.getEmailId() != null) {
+
+                    request.setAttribute("errorMessage", "A user with this email address already exists!");
+                    RequestDispatcher rd = request.getRequestDispatcher("../index.jsp");
+                    rd.include(request, response);
+
+                } else {
+
+                    UserDTO temp = new UserDTO();
+//                    temp.setUserId(1);
+                    temp.setEmailId(userEmail);
+                    temp.setPassword(userPasswod);
+
+                    serviceFactory.createUserService().saveUser(temp);
+
+                    session.setAttribute("email", userEmail);
+
+                    System.out.println("User Signed Up " + userEmail);
+                    RequestDispatcher rd=request.getRequestDispatcher("/index.jsp");
+
+                    rd.include(request,response);
+
+                }
+
+
+            }  catch (EmailNotValidException | SQLException exception) {
+                request.setAttribute("errorMessage", exception.getMessage());
+                System.out.println(exception.getMessage());
+                RequestDispatcher rd=request.getRequestDispatcher("../index.jsp");
+                rd.include(request,response);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+        if (session.getAttribute("email") != null) {
+
+            response.sendRedirect("/Home.jsp");
+
+        }
+
+
+}
+
+
+
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    }
 }

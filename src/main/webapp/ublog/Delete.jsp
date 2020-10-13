@@ -13,7 +13,11 @@
 	(Hint: You need to handle NullPointerException.)
 	(Hint: Make use of the email id stored in the session object to check if user is logged in or not.)
 -->
-
+<%
+    if(session.getAttribute("email")==null){
+        response.sendRedirect("/");
+    }
+%>
 <!--
 	TODO: 7.17. Design the "Delete Post" page with the following properties.
 	    1. Title of the page should be "Delete Post"
@@ -25,7 +29,52 @@
 	    5. Provide a "Delete" submit button.
         6. Provide a link to the "Home Page".
 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
 
+    <title>Delete Post</title>
+
+</head>
+<body>
+
+<h3>Logged In as ${username} </h3>
+
+<form action = "/ublog/post/util" method = "POST" >
+    <table cellspacing="10">
+        <tr>
+            <td><label for="postid"> Post ID: </label>
+            </td>
+            <td>
+                <input id="postid" type = "number" name = "postid" placeholder="Post ID" required min="1">
+            </td>
+        </tr>
+
+        <tr>
+            <td> <input type = "submit" name = "actionType" value = "Delete" />
+
+            </td>
+            <td>
+                <a href="/Home.jsp">Home Page</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <% if (request.getAttribute("errorMessage")!=null) { %>
+                <%= request.getAttribute("errorMessage") %>
+
+                <%  } %>
+
+            </td>
+            <td></td>
+        </tr>
+
+    </table>
+</form>
+
+
+</body>
 <!--
     TODO: 7.18. If the user is logged in then display the string before @ in the user email id
     on this web page. For example, if email id is example@gmail.com, then display "Logged In as example"

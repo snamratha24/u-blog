@@ -24,3 +24,51 @@
 	        and Logout.jsp page. They should be provided in the same order as shown on the learn platform with
 	        some spacing between them.
 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+
+	<title>Home Page</title>
+
+</head>
+<body>
+	<table>
+		<tr>
+			<td>
+<%
+	String emailId = (String)session.getAttribute("email");
+	if(emailId!=null){
+		int endingIndex = emailId.indexOf('@');
+		String username;
+		if(endingIndex!=-1)
+			username=emailId.substring(0,endingIndex);
+		else
+			username=emailId;
+		session.setAttribute("username",username);
+
+		out.print("Logged in as " + username);
+
+	} else {
+		response.sendRedirect("/index.jsp");
+	}%>
+
+
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a href="ublog/Create.jsp"><p>Create Post</p></a>
+				<a href="ublog/Search.jsp"><p>Search Post</p></a>
+				<a href="ublog/Delete.jsp"><p>Delete Post</p></a>
+				<a href="ublog/Filter.jsp"><p>Filter Post</p></a>
+				<a href="Logout.jsp"><p>Logout</p></a>
+
+
+			</td>
+		</tr>
+	</table>
+
+
+</body>

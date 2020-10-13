@@ -14,6 +14,8 @@
 	the session object when the user successfully signs in or sign up.)
 -->
 
+
+
 <!--
 	TODO: 4.4. Design the "Sign In / Sign Up" page with following properties.
 	    1. Title of the page should be "Sign In / Sign Up"
@@ -28,6 +30,64 @@
         7. Use the table tag to align the labels and text fields.
         8. Provide "Sign In" and "Sign Up" submit buttons.
 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Sign In / Sign Up</title>
+
+</head>
+<body>
+<table style="width:860">
+    <tr>
+        <td>
+            <form action = "ublog/user" method = "POST" >
+                <label for="useremail"> User Email: </label>
+            </td>
+        <td>
+                <input id="useremail" type = "text" name = "useremail" placeholder="example@email.com" required>
+        </td>
+    </tr>
+        <tr>
+        <td>
+        <label for="password"> Password: </label>
+        </td>
+        <td>
+                <input id="password" type = "password" name = "password" placeholder="********" required/>
+        </td>
+        </tr>
+        <tr>
+            <td>
+                <input type = "submit" name = "btn" value = "Signin" />
+            </td>
+            <td>
+                <input type = "submit" name = "btn" value = "Signup" />
+
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <% if (request.getAttribute("errorMessage")!=null) { %>
+
+        <td>
+                <%= request.getAttribute("errorMessage") %>
+        </td>
+                        <%  } %>
+
+    </tr>
+</table>
+
+<%
+
+    String loggedin=(String)session.getAttribute("email");
+    if (loggedin != null) {
+        response.sendRedirect("Home.jsp");
+    }
+%>
+
+
+</body>
 
 <!--
     TODO: 4.12. Write the Java code to display the error message present in the request object. The

@@ -1,7 +1,5 @@
 package com.upgrad.ublog.dto;
 
-import java.time.LocalDateTime;
-
 /**
  * TODO: 2.3. Declare 3 private instance variables in this class named as
  *  userId, emailId and password. Out of these 3 variables, userId will be of
@@ -13,19 +11,6 @@ import java.time.LocalDateTime;
  */
 
 public class UserDTO {
-   private int userId;
-   private String emailId;
-   private String password;
-
-    public UserDTO(int userId, String emailId, String password) {
-        this.userId = userId;
-        this.emailId = emailId;
-        this.password = password;
-
-    }
-
-    public UserDTO() {
-    }
 
     public int getUserId() {
         return userId;
@@ -40,7 +25,7 @@ public class UserDTO {
     }
 
     public void setEmailId(String emailId) {
-        this.emailId= emailId;
+        this.emailId = emailId;
     }
 
     public String getPassword() {
@@ -50,6 +35,10 @@ public class UserDTO {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    private int userId;
+    private String emailId;
+    private String password;
 
     @Override
     public String toString() {

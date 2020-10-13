@@ -1,5 +1,9 @@
 package com.upgrad.ublog.db;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 /**
  * TODO 6.2: Implement the DatabaseConnection class using the Singleton Pattern (Hint. Should have the
  *  private no-arg constructor, a private static connection attribute of type Connection and a public
@@ -13,12 +17,62 @@ package com.upgrad.ublog.db;
 
 public class DatabaseConnection {
 
-    /*public static void main(String[] args) throws SQLException{
+    public static void main(String[] args) throws SQLException{
         try {
-        	DatabaseConnection.getConnection();
-        	System.out.println("Connected");
+        	Connection newConnection = getConnection();
+        	if(newConnection != null) {
+        	System.out.println("Connected");} else {
+        	    throw new Exception();
+            }
         } catch (Exception e) {
         	System.out.println("Not Connected");
         }
-    }*/
+    }
+
+  /*  private static Connection connection;
+
+    private DatabaseConnection() {
+        try {
+
+            connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/orcl", "hr", "oracle");
+            System.out.println("Connected");
+
+        }  catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static Connection getConnection() {
+        return connection;
+    }
+    */
+
+//    HOHOJHO
+
+    private static Connection connection = null;
+
+    public static Connection getConnection () throws SQLException{
+        if (connection == null) {
+            String url = "jdbc:oracle:thin:@localhost:1521/orcl";
+            String username = "hr";
+            String password = "oracle";
+
+            try {
+                Class.forName("oracle.jdbc.driver.OracleDriver");
+                connection = DriverManager.getConnection(url, username, password);
+                System.out.println(connection);
+            } catch (ClassNotFoundException e) {
+                System.out.println("Oracle Driver not found. Please download and add the driver.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.out.println(e.getMessage());
+            }
+        }
+        return connection;
+    }
+
+    public DatabaseConnection() {}
+
+
 }
+

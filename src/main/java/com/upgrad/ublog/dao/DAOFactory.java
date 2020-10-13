@@ -10,5 +10,17 @@ package com.upgrad.ublog.dao;
  */
 
 public class DAOFactory {
+//    public UserDAO getUserDao() {
+//
+//        return UserDAO.getInstance();
+//    };
 
+    public UserDAO createUserDAO() {
+        return UserDAO.getInstance();
+    }
+
+    public PostDAO createPostDAO() {
+//        return PostDAO.getInstance();
+        return PostDAO.getInstance();
+    }
 }

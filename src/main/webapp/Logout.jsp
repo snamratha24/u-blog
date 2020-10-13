@@ -5,3 +5,10 @@
     Home.jsp is clicked, the session is invalidated and user is redirected to the
     Sign In/ Sign Up page.
 -->
+
+<%
+    session.invalidate();
+    response.sendRedirect("/");
+    System.out.println("Logged Out Successfully");
+
+%>

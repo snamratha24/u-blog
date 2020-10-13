@@ -53,6 +53,13 @@ package com.upgrad.ublog.services;
  *  with a message "Some unexpected error occurred!"
  */
 
+import com.upgrad.ublog.dao.PostDAO;
+import com.upgrad.ublog.dto.PostDTO;
+import com.upgrad.ublog.exceptions.PostNotFoundException;
+
+import java.sql.SQLException;
+import java.util.List;
+
 /**
  * TODO: 7.25. Implement getPostsByTag() method which takes tag as an input parameter and
  *  returns all the posts corresponding to the tag using the findByTag() method of PostDAO interface.
@@ -61,6 +68,91 @@ package com.upgrad.ublog.services;
  *  with a message "Some unexpected error occurred!"
  */
 
-public class PostServiceImpl {
+public class PostServiceImpl implements PostService{
 
+    private PostServiceImpl() {}
+
+    public static PostServiceImpl instance;
+
+    public static PostServiceImpl getInstance() {
+        if (instance == null) {
+            instance = new PostServiceImpl();
+        }
+        return instance;
+    }
+
+
+    @Override
+    public PostDTO save(PostDTO postDTO) throws Exception {
+        try {
+            return PostDAO.getInstance().create(postDTO);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new Exception("Some unexpected error occurred!");
+        }
+    }
+
+    @Override
+    public List<PostDTO> getPostsByEmail(String emailId) throws Exception {
+        try {
+            return PostDAO.getInstance().findByEmail(emailId);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new Exception("Some unexpected error occurred!");
+        }
+
+    }
+
+    @Override
+    public List<PostDTO> getPostsByTag(String tag) throws Exception {
+        try {
+            return PostDAO.getInstance().findByTag(tag);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new Exception("Some unexpected error occurred!");
+        }
+    }
+
+    @Override
+    public List<String> getAllTags() throws Exception {
+
+        try {
+            List<String> alltags = PostDAO.getInstance().findAllTags();
+
+            System.out.println("POSTSERVICE IMPL" + alltags);
+            return  alltags;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new Exception("Some unexpected error occurred!");
+        }
+
+    }
+
+    @Override
+    public boolean deletePost(int id, String emailId) throws Exception {
+        try {
+            System.out.println("POSTID SEARCH" + id);
+
+            PostDTO posstID = PostDAO.getInstance().findById(id);
+            System.out.println("POSTID" + posstID);
+            if (posstID != null) {
+                System.out.println("GIVEN EMAIL ID" + emailId);
+                System.out.println("EMAIL ID" + posstID.getEmailId());
+                if (emailId.equals(posstID.getEmailId())) {
+//                    boolean delete  =  PostDAO.getInstance().deleteById(id);
+                    PostDAO.getInstance().deleteById(id);
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                throw new PostNotFoundException("No Post exist with the given Post Id");
+            }
+//            return PostDAO.getInstance().findById(id);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new Exception("Some unexpected error occurred!");
+        }
+
+    }
 }

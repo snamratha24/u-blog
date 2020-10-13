@@ -6,16 +6,20 @@ package com.upgrad.ublog.exceptions;
  *  parameter and passes it to its base class.
  */
 
-public class EmailNotValidException {
+public class EmailNotValidException extends Exception {
 
-    /*public static void main(String[] args) {
+
+    public EmailNotValidException(String customMessage) {
+        super(customMessage);
+    }
+    public static void main(String[] args) {
 		try {
 			throw new EmailNotValidException("Custom Message");
 		} catch (EmailNotValidException e) {
 			System.out.println(e.getMessage());
 		}
 
-		 //Your output should look like this.
-		 //Custom Message
-	}*/
+//		 Your output should look like this.
+//		 Custom Message
+	}
 }

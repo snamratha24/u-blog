@@ -12,4 +12,9 @@ public interface PostDAO {
     PostDTO findById(int id) throws SQLException;
     List<String> findAllTags() throws SQLException;
     boolean deleteById(int id) throws SQLException;
+
+    public static PostDAOImpl getInstance() {
+        return new PostDAOImpl();
+    }
+
 }
